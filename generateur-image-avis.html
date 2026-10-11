@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Générateur d'image avis 5★ pour Instagram — gratuit</title>
+<meta name="description" content="Transformez vos avis Google 5 étoiles en belles images à poster sur Instagram et Facebook. Gratuit, en 30 secondes.">
+<link rel="canonical" href="https://qr-avis-google.netlify.app/generateur-image-avis.html">
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--accent:#4ade80;--text:#f1f5f9;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:20px}
+.wrap{max-width:720px;margin:0 auto}
+header{text-align:center;padding:24px 0}
+.badge{display:inline-block;background:#052e16;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:4px 14px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+h1{font-size:1.6rem;margin-bottom:8px}
+.card{background:var(--card);border-radius:14px;padding:24px;margin:20px 0}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input,textarea,select{width:100%;padding:12px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:var(--text);font-size:1rem}
+textarea{min-height:100px;resize:vertical}
+button{background:var(--accent);color:#052e16;border:none;border-radius:8px;padding:14px 20px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-top:16px}
+button.secondary{background:#334155;color:var(--text);margin-top:10px}
+.hint{color:var(--muted);font-size:.9rem;margin-top:8px}
+#preview-wrap{text-align:center;margin:20px 0}
+#preview{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.colors{display:flex;gap:10px;margin-top:6px}
+.colors label{flex:1;text-align:center;font-size:.85rem;font-weight:400}
+.colors input{height:44px;padding:4px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:24px 0}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<span class="badge">100 % GRATUIT</span>
+<h1>⭐ Générateur d'image avis 5★</h1>
+<p>Transformez vos meilleurs avis Google en images à poster sur Instagram et Facebook.</p>
+</header>
+<div class="card">
+<label for="business">Nom de votre commerce</label>
+<input type="text" id="business" placeholder="Ex : Boulangerie Martin" maxlength="40">
+<label for="author">Nom du client (qui a laissé l'avis)</label>
+<input type="text" id="author" placeholder="Ex : Sophie L." maxlength="30">
+<label for="review">Texte de l'avis</label>
+<textarea id="review" placeholder="Collez ici le texte de l'avis 5 étoiles…" maxlength="280"></textarea>
+<label>Couleurs</label>
+<div class="colors">
+<div><label>Fond</label><input type="color" id="bgcolor" value="#0f172a"></div>
+<div><label>Accent</label><input type="color" id="accentcolor" value="#4ade80"></div>
+<div><label>Texte</label><input type="color" id="textcolor" value="#f1f5f9"></div>
+</div>
+<button onclick="generer()">🎨 Générer mon image</button>
+</div>
+<div class="card" id="result-card" style="display:none">
+<div id="preview-wrap"><canvas id="preview" width="1080" height="1080"></canvas></div>
+<button class="secondary" onclick="telecharger()">⬇️ Télécharger en PNG (1080×1080)</button>
+<p class="hint">Format carré parfait pour Instagram et Facebook.</p>
+</div>
+<p class="hint" style="text-align:center">💡 <a href="index.html" style="color:var(--accent)">Générez aussi votre QR code d'avis gratuit →</a></p>
+<p style="text-align:center;margin-top:12px;"><a href="https://wa.me/?text=Je%20viens%20de%20cr%C3%A9er%20une%20image%20pour%20mes%20avis%20Google%20en%2030%20secondes%20!%20Essaie%20:%20https%3A%2F%2Fqr-avis-google.netlify.app%2Fgenerateur-image-avis.html" target="_blank" rel="noopener" style="display:inline-block;background:#25D366;color:#fff;border-radius:8px;padding:10px 20px;font-weight:700;text-decoration:none;">📱 Partager sur WhatsApp</a></p>
+<footer><a href="index.html">← Retour au générateur QR</a></footer>
+</div>
+<script>
+function generer(){
+const business=document.getElementById('business').value.trim()||'Votre commerce';
+const author=document.getElementById('author').value.trim()||'Client satisfait';
+const review=document.getElementById('review').value.trim()||'Excellent service, je recommande vivement !';
+const bg=document.getElementById('bgcolor').value;
+const accent=document.getElementById('accentcolor').value;
+const tc=document.getElementById('textcolor').value;
+const c=document.getElementById('preview');
+const x=c.getContext('2d');
+// Fond
+x.fillStyle=bg;x.fillRect(0,0,1080,1080);
+// Bordure accent
+x.strokeStyle=accent;x.lineWidth=12;x.strokeRect(24,24,1032,1032);
+// Étoiles
+x.font='90px sans-serif';x.textAlign='center';
+x.fillStyle=accent;x.fillText('★★★★★',540,220);
+// Commerce
+x.fillStyle=tc;x.font='bold 54px system-ui,sans-serif';
+wrapText(x,business,540,330,900,60);
+// Avis (guillemets)
+x.font='italic 44px system-ui,sans-serif';x.fillStyle=tc;
+wrapText(x,'« '+review+' »',540,480,880,58);
+// Auteur
+x.font='40px system-ui,sans-serif';x.fillStyle=accent;
+x.fillText('— '+author,540,880);
+// Badge Google
+x.font='32px system-ui,sans-serif';x.fillStyle='#94a3b8';
+x.fillText('Avis Google vérifié',540,950);
+document.getElementById('result-card').style.display='block';
+document.getElementById('result-card').scrollIntoView({behavior:'smooth'});
+}
+function wrapText(x,text,cx,y,maxW,lh){
+const words=text.split(' ');let line='',yy=y;
+x.textAlign='center';
+for(let n=0;n<words.length;n++){
+const t=line+words[n]+' ';
+if(x.measureText(t).width>maxW&&n>0){x.fillText(line,cx,yy);line=words[n]+' ';yy+=lh;}
+else line=t;
+}
+x.fillText(line,cx,yy);
+}
+function telecharger(){
+const c=document.getElementById('preview');
+const a=document.createElement('a');
+a.download='avis-5-etoiles.png';
+a.href=c.toDataURL('image/png');
+a.click();
+}
+// Génère un aperçu par défaut
+window.onload=function(){generer();document.getElementById('result-card').style.display='none';};
+['bgcolor','accentcolor','textcolor'].forEach(id=>document.getElementById(id).addEventListener('input',function(){if(document.getElementById('result-card').style.display!=='none')generer();}));
+</script>
+</body>
+</html>
