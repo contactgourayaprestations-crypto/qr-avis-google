@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur gratuit de QR Code Avis Google — Gouraya Prestations</title>
+<meta name="description" content="Créez en 30 secondes le lien et le QR code pour que vos clients laissent un avis Google. Gratuit, sans inscription.">
+<meta name="keywords" content="QR code avis Google, générateur QR code gratuit, lien avis Google, augmenter avis Google, QR code commerce">
+<meta property="og:title" content="Générateur gratuit de QR Code Avis Google">
+<meta property="og:description" content="Créez en 30 secondes le lien et le QR code pour que vos clients laissent un avis Google. Gratuit, sans inscription.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://qr-avis-google.netlify.app/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Comment créer un QR code pour les avis Google de mon commerce ?","acceptedAnswer":{"@type":"Answer","text":"Trouvez votre Place ID Google via l'outil officiel Google, collez-le dans notre générateur gratuit, et téléchargez votre QR code à imprimer pour votre comptoir."}},
+{"@type":"Question","name":"Le générateur de QR code avis Google est-il vraiment gratuit ?","acceptedAnswer":{"@type":"Answer","text":"Oui, 100 % gratuit et sans inscription. Vous obtenez votre lien d'avis direct et votre QR code en 30 secondes."}},
+{"@type":"Question","name":"Où placer le QR code d'avis dans mon établissement ?","acceptedAnswer":{"@type":"Answer","text":"À la caisse, sur les tables, sur les factures ou à la sortie. Plus il est visible au moment où le client est satisfait, plus vous récoltez d'avis."}},
+{"@type":"Question","name":"Comment avoir plus d'avis Google rapidement ?","acceptedAnswer":{"@type":"Answer","text":"Demandez au bon moment (après un compliment), affichez un QR code visible, ajoutez le lien à vos factures, répondez à tous vos avis existants, et envoyez un rappel par SMS le lendemain."}}
+]}
+</script>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --accent:#22c55e; --text:#f1f5f9; --muted:#94a3b8; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .wrap { max-width:640px; margin:0 auto; padding:24px 16px 64px; }
+  header { text-align:center; padding:32px 0 24px; }
+  header h1 { font-size:1.7rem; margin-bottom:8px; }
+  header p { color:var(--muted); }
+  .card { background:var(--card); border-radius:14px; padding:24px; margin:20px 0; }
+  label { display:block; font-weight:600; margin-bottom:8px; }
+  input[type=text], input[type=email] { width:100%; padding:12px; border-radius:8px; border:1px solid #334155; background:#0f172a; color:var(--text); font-size:1rem; margin-bottom:12px; }
+  button { background:var(--accent); color:#052e16; border:none; border-radius:8px; padding:12px 20px; font-size:1rem; font-weight:700; cursor:pointer; width:100%; }
+  button:hover { filter:brightness(1.1); }
+  button.secondary { background:#334155; color:var(--text); margin-top:8px; }
+  .result { display:none; margin-top:16px; }
+  .linkbox { background:#0f172a; border:1px dashed #475569; border-radius:8px; padding:12px; word-break:break-all; font-size:.9rem; margin:12px 0; }
+  #qrcode { display:flex; justify-content:center; margin:16px 0; background:#fff; padding:12px; border-radius:8px; }
+  .hint { font-size:.85rem; color:var(--muted); margin-top:12px; }
+  .hint a { color:var(--accent); }
+  .steps { margin:12px 0 12px 20px; color:var(--muted); font-size:.95rem; }
+  footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:40px; }
+  footer a { color:var(--accent); text-decoration:none; }
+  .badge { display:inline-block; background:#052e16; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:4px 14px; font-size:.8rem; font-weight:700; margin-bottom:12px; }
+  /* --- Nav + auth SaaS --- */
+  .topnav { display:flex; justify-content:space-between; align-items:center; padding:12px 0; }
+  .brand { font-weight:700; font-size:1.05rem; }
+  .navbtn { background:var(--accent); color:#052e16; border:none; border-radius:8px; padding:8px 16px; font-size:.9rem; font-weight:700; cursor:pointer; width:auto; margin-left:8px; }
+  .navbtn.secondary { background:#334155; color:var(--text); }
+  .navemail { font-size:.85rem; color:var(--muted); margin-right:4px; }
+  .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:50; align-items:center; justify-content:center; padding:16px; }
+  .modal-backdrop.open { display:flex; }
+  .modal { background:var(--card); border-radius:14px; padding:28px; width:100%; max-width:400px; }
+  .modal h2 { margin-bottom:4px; }
+  .modal .tabs { display:flex; gap:8px; margin:12px 0 20px; }
+  .modal .tabs button { flex:1; padding:10px; }
+  .modal .tabs button.inactive { background:#334155; color:var(--text); }
+  .auth-error { display:none; background:#450a0a; color:#fca5a5; border-radius:8px; padding:10px 12px; font-size:.9rem; margin-bottom:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="topnav">
+    <span class="brand">⭐ QR Avis Google</span>
+    <span id="nav-auth">
+      <button class="navbtn secondary" onclick="openAuth('login')">Se connecter</button>
+      <button class="navbtn" onclick="openAuth('signup')">Créer un compte</button>
+    </span>
+    <span id="nav-user" style="display:none;">
+      <span class="navemail" id="nav-email"></span>
+      <a href="dashboard.html" class="navbtn" style="text-decoration:none;display:inline-block;">Tableau de bord</a>
+      <button class="navbtn secondary" onclick="logout()">Déconnexion</button>
+    </span>
+  </nav>
+  <!-- ADSENSE : emplacement bannière haute (à activer quand le compte AdSense sera créé) -->
+  <header>
+    <span class="badge">100 % GRATUIT — SANS INSCRIPTION</span>
+    <h1>⭐ Générateur de QR Code<br>Avis Google</h1>
+    <p>En 30 secondes : votre lien d'avis Google + un QR code à imprimer pour votre comptoir.</p>
+  </header>
+
+  <div class="card">
+    <label for="placeid">Votre Place ID Google <em>ou</em> votre lien d'avis existant</label>
+    <input type="text" id="placeid" placeholder="Ex : ChIJN1t_tDeuEmsRUsoyG83frY4">
+    <button onclick="generer()">Générer mon lien + QR code</button>
+    <div class="hint">Où trouver mon Place ID ?
+      <ol class="steps">
+        <li>Allez sur <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">l'outil officiel Google</a></li>
+        <li>Tapez le nom de votre établissement, copiez le <strong>Place ID</strong></li>
+        <li>Collez-le ci-dessus</li>
+      </ol>
+    </div>
+    <div class="result" id="result">
+      <label>Votre lien d'avis direct :</label>
+      <div class="linkbox" id="reviewlink"></div>
+      <button class="secondary" onclick="copier()">📋 Copier le lien</button>
+      <label style="margin-top:16px;">Votre QR code (à imprimer) :</label>
+      <div id="qrcode"></div>
+      <button class="secondary" onclick="telecharger()">⬇️ Télécharger le QR en PNG</button>
+      <button class="secondary" id="btn-save-qr" onclick="saveCurrentQR()" style="display:none;">💾 Sauvegarder dans mon compte</button>
+      <p class="hint" id="hint-login-save">💡 <a href="#" onclick="openAuth('signup');return false;" style="color:var(--accent);">Créez un compte gratuit</a> pour sauvegarder ce QR code.</p>
+    </div>
+  </div>
+
+  <div class="card" style="border:1px solid #f59e0b;">
+    <span class="badge" style="background:#451a03;color:#fbbf24;border-color:#f59e0b;">✨ PREMIUM — BIENTÔT</span>
+    <h2 style="font-size:1.15rem;margin-bottom:8px;">Personnalisez votre QR code</h2>
+    <p style="color:var(--muted);font-size:.95rem;margin-bottom:12px;">Aux couleurs de votre commerce, avec votre logo au centre.</p>
+    <div style="display:flex;gap:12px;margin-bottom:12px;">
+      <div style="flex:1;"><label style="font-size:.85rem;">Couleur du QR</label><input type="color" id="qrcolor" value="#000000" style="width:100%;height:44px;padding:4px;"></div>
+      <div style="flex:1;"><label style="font-size:.85rem;">Couleur du fond</label><input type="color" id="qrbg" value="#ffffff" style="width:100%;height:44px;padding:4px;"></div>
+    </div>
+    <label style="font-size:.85rem;">Logo au centre (PNG/JPG)</label>
+    <input type="file" id="qrlogo" accept="image/*" style="margin-bottom:12px;">
+    <div id="qrcode-premium" style="display:flex;justify-content:center;margin:16px 0;background:#fff;padding:12px;border-radius:8px;position:relative;min-height:224px;align-items:center;">
+      <span style="color:#94a3b8;font-size:.9rem;">Générez d'abord votre QR ci-dessus</span>
+    </div>
+    <a href="mailto:contact.gourayaprestations@gmail.com?subject=Premium%20QR%20personnalis%C3%A9&body=Bonjour%2C%0A%0AJe%20veux%20la%20version%20premium%20du%20g%C3%A9n%C3%A9rateur%20QR%20(QR%20personnalis%C3%A9%2C%20export%20HD).%20Pr%C3%A9venez-moi%20au%20lancement.%0A%0ANom%20%3A%20%0ACommerce%20%3A%20%0A" style="display:block;text-align:center;background:#f59e0b;color:#451a03;border-radius:8px;padding:12px 20px;font-weight:700;text-decoration:none;margin-top:8px;">✨ Être prévenu du lancement premium</a>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.15rem;margin-bottom:8px;">📩 Recevez le guide gratuit</h2>
+    <p style="color:var(--muted);font-size:.95rem;margin-bottom:12px;"><strong>5 méthodes simples pour doubler vos avis Google en 30 jours</strong> — envoyé par email, sans spam.</p>
+    <p style="color:var(--muted);font-size:.95rem;margin-bottom:12px;">Écrivez-nous et recevez-le par retour d'email, sans spam :</p>
+    <a href="mailto:contact.gourayaprestations@gmail.com?subject=Guide%20gratuit%20%E2%80%94%205%20m%C3%A9thodes%20pour%20doubler%20mes%20avis%20Google&body=Bonjour%2C%0A%0AJe%20veux%20recevoir%20le%20guide%20gratuit%20%C2%AB%205%20m%C3%A9thodes%20pour%20doubler%20mes%20avis%20Google%20%C2%BB.%0A%0ANom%20%3A%20%0ACommerce%20%3A%20%0A" style="display:block;text-align:center;background:var(--accent);color:#052e16;border-radius:8px;padding:12px 20px;font-weight:700;text-decoration:none;">📩 Recevoir le guide gratuit par email</a>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.15rem;margin-bottom:12px;">❓ Questions fréquentes</h2>
+    <p style="margin-bottom:12px;"><strong>Comment créer un QR code pour les avis Google de mon commerce ?</strong><br>
+    <span style="color:var(--muted);">Trouvez votre Place ID via l'outil officiel Google, collez-le ci-dessus, et téléchargez votre QR code à imprimer.</span></p>
+    <p style="margin-bottom:12px;"><strong>Où placer le QR code dans mon établissement ?</strong><br>
+    <span style="color:var(--muted);">À la caisse, sur les tables, sur les factures. Plus il est visible quand le client est satisfait, plus vous récoltez d'avis.</span></p>
+    <p style="margin-bottom:4px;"><strong>Comment avoir plus d'avis Google rapidement ?</strong><br>
+    <span style="color:var(--muted);">Demandez au bon moment, affichez un QR code visible, répondez à tous vos avis existants, et envoyez un rappel par SMS le lendemain. Notre guide gratuit détaille 5 méthodes.</span></p>
+  </div>
+
+  <div class="card" style="border:1px solid var(--accent);">
+    <span class="badge">🚀 BIENTÔT DISPONIBLE — PRIORITÉ AUX INSCRITS</span>
+    <h2 style="font-size:1.3rem;margin-bottom:8px;">AvisBoost — vos avis Google en pilote automatique</h2>
+    <p style="color:var(--muted);margin-bottom:12px;">Le problème : vous savez qu'il faut demander des avis. Mais entre le service, la caisse et la fatigue, on oublie. Pendant ce temps, vos concurrents qui demandent <strong style="color:var(--text);">systématiquement</strong> passent devant vous sur Google.</p>
+    <p style="color:var(--muted);margin-bottom:12px;">La solution : après chaque visite, votre client reçoit <strong style="color:var(--text);">automatiquement</strong> un SMS avec votre lien d'avis. Vous ne faites rien. Les avis arrivent tout seuls, semaine après semaine.</p>
+    <ul style="list-style:none;margin:12px 0;color:var(--muted);">
+      <li>✓ Zéro effort au quotidien — tout est automatique</li>
+      <li>✓ Vos clients satisfaits deviennent vos meilleurs vendeurs</li>
+      <li>✓ Plus d'avis = plus visible sur Google = plus de clients</li>
+    </ul>
+    <p style="margin:12px 0;"><strong style="font-size:1.2rem;color:var(--accent);">49 €/mois</strong> <span style="color:var(--muted);">— sans engagement</span></p>
+    <a href="mailto:contact.gourayaprestations@gmail.com?subject=Liste%20d%27attente%20AvisBoost&body=Bonjour%2C%0A%0AJe%20veux%20%C3%AAtre%20pr%C3%A9venu%20d%C3%A8s%20qu%27AvisBoost%20est%20disponible.%0A%0ANom%20%3A%20%0ACommerce%20%3A%20%0AT%C3%A9l%C3%A9phone%20%3A%20%0A" style="display:block;text-align:center;background:var(--accent);color:#052e16;border-radius:8px;padding:12px 20px;font-weight:700;text-decoration:none;">🔔 Je veux être prévenu en premier</a>
+    <p class="hint">Lancement imminent — les inscrits passent en premier, places limitées au départ.</p>
+  </div>
+
+  <!-- ADSENSE : emplacement milieu de page (à activer quand le compte AdSense sera créé) -->
+
+  <footer>
+    Outil gratuit par <strong>Gouraya Prestations</strong><br>
+    💬 Vous voulez automatiser vos demandes d'avis par SMS ? <a href="mailto:contact.gourayaprestations@gmail.com">Contactez-nous</a>
+  </footer>
+</div>
+
+<script>
+/* Chargement robuste de la librairie QR : cdnjs -> jsdelivr -> unpkg, puis mode degrade */
+var QR_SOURCES = [
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
+  'https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js'
+];
+var qrState = 'loading'; /* loading | ready | failed */
+(function loadQR(i) {
+  if (i >= QR_SOURCES.length) { qrState = 'failed'; return; }
+  var s = document.createElement('script');
+  s.src = QR_SOURCES[i];
+  s.onload = function () { qrState = (typeof QRCode !== 'undefined') ? 'ready' : 'failed'; if (qrState !== 'ready') loadQR(i + 1); };
+  s.onerror = function () { loadQR(i + 1); };
+  document.head.appendChild(s);
+})(0);
+</script>
+<script>
+let qr = null;
+function renderQR(el, link) {
+  el.innerHTML = '';
+  qr = new QRCode(el, { text: link, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+}
+function qrFallback(el) {
+  el.innerHTML = '<p style="color:#f1f5f9;padding:8px;font-size:.9rem;">QR indisponible pour le moment (connexion) \u2014 le lien ci-dessus fonctionne d\u00e9j\u00e0, copiez-le.</p>';
+}
+function generer() {
+  let v = document.getElementById('placeid').value.trim();
+  if (!v) { alert('Collez votre Place ID ou votre lien d\u2019avis Google.'); return; }
+  const m = v.match(/placeid=([^&\s]+)/i);
+  const placeId = m ? m[1] : v;
+  const link = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(placeId);
+  document.getElementById('reviewlink').textContent = link;
+  const qrel = document.getElementById('qrcode');
+  qrel.innerHTML = '';
+  document.getElementById('result').style.display = 'block';
+  if (qrState === 'ready') {
+    renderQR(qrel, link);
+  } else if (qrState === 'loading') {
+    qrel.innerHTML = '<p style="color:#94a3b8;padding:8px;font-size:.9rem;">\u23f3 Chargement du g\u00e9n\u00e9rateur QR\u2026</p>';
+    let tries = 0;
+    const t = setInterval(function () {
+      tries++;
+      if (qrState === 'ready') { clearInterval(t); renderQR(qrel, link); }
+      else if (qrState === 'failed' || tries > 13) { clearInterval(t); qrFallback(qrel); }
+    }, 300);
+  } else {
+    qrFallback(qrel);
+  }
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+  if (typeof refreshSaveButton === 'function') refreshSaveButton();
+}
+function copier() {
+  const t = document.getElementById('reviewlink').textContent;
+  navigator.clipboard.writeText(t).then(() => alert('Lien copié !'));
+}
+function telecharger() {
+  const img = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
+  if (!img) return;
+  const a = document.createElement('a');
+  a.download = 'qr-avis-google.png';
+  a.href = img.src || img.toDataURL('image/png');
+  a.click();
+}
+/* --- Premium : QR personnalisé (couleurs + logo) --- */
+let premiumLogo = null;
+function renderPremium() {
+  const linkEl = document.getElementById('reviewlink');
+  const link = linkEl ? linkEl.textContent.trim() : '';
+  const box = document.getElementById('qrcode-premium');
+  if (!link) return;
+  const dark = document.getElementById('qrcolor').value;
+  const light = document.getElementById('qrbg').value;
+  box.innerHTML = '';
+  const holder = document.createElement('div');
+  holder.style.position = 'relative';
+  holder.style.width = '200px';
+  holder.style.height = '200px';
+  box.appendChild(holder);
+  try {
+    new QRCode(holder, { text: link, width: 200, height: 200, colorDark: dark, colorLight: light, correctLevel: QRCode.CorrectLevel.H });
+  } catch (e) { box.innerHTML = '<span style="color:#94a3b8;font-size:.9rem;">Personnalisation indisponible</span>'; return; }
+  if (premiumLogo) {
+    const img = document.createElement('img');
+    img.src = premiumLogo;
+    img.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;object-fit:contain;background:#fff;border-radius:8px;padding:4px;';
+    holder.appendChild(img);
+  }
+}
+['qrcolor','qrbg'].forEach(id => document.getElementById(id).addEventListener('input', renderPremium));
+document.getElementById('qrlogo').addEventListener('change', function (e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = function (ev) { premiumLogo = ev.target.result; renderPremium(); };
+  r.readAsDataURL(f);
+});
+/* Régénère le premium après chaque génération principale */
+const _origGenerer = generer;
+generer = function () { _origGenerer(); setTimeout(renderPremium, 600); };
+</script>
+<script>
+/* ============ AUTH SaaS ============ */
+const API = '/.netlify/functions';
+const TOKEN_KEY = 'saasqr_token';
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t) { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); }
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  const tok = getToken();
+  if (tok) headers['Authorization'] = 'Bearer ' + tok;
+  const res = await fetch(API + path, { ...opts, headers });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  return { status: res.status, data };
+}
+let authMode = 'signup';
+function openAuth(mode) {
+  authMode = mode || 'signup';
+  authTab(authMode);
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-modal').classList.add('open');
+}
+function closeAuth() { document.getElementById('auth-modal').classList.remove('open'); }
+function authTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-signup').className = mode === 'signup' ? '' : 'inactive';
+  document.getElementById('tab-login').className = mode === 'login' ? '' : 'inactive';
+  document.getElementById('auth-title').textContent = mode === 'signup' ? 'Créer un compte' : 'Se connecter';
+  document.getElementById('auth-submit').textContent = mode === 'signup' ? 'Créer mon compte' : 'Se connecter';
+}
+function authFail(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+async function submitAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!email || !password) return authFail('Email et mot de passe requis.');
+  if (authMode === 'signup' && password.length < 8) return authFail('Mot de passe : 8 caractères minimum.');
+  const btn = document.getElementById('auth-submit');
+  btn.disabled = true; btn.textContent = 'Patientez…';
+  try {
+    const { status, data } = await api(authMode === 'signup' ? '/auth-signup' : '/auth-login', {
+      method: 'POST', body: JSON.stringify({ email, password }),
+    });
+    if (status === 200 || status === 201) {
+      setToken(data.token);
+      closeAuth();
+      await refreshNav();
+      window.location.href = 'dashboard.html';
+    } else {
+      authFail(data.error || 'Une erreur est survenue.');
+    }
+  } catch (e) {
+    authFail('Connexion impossible, vérifiez votre réseau.');
+  } finally {
+    btn.disabled = false;
+    authTab(authMode);
+  }
+}
+async function refreshNav() {
+  const tok = getToken();
+  const navAuth = document.getElementById('nav-auth');
+  const navUser = document.getElementById('nav-user');
+  if (!tok) { navAuth.style.display = ''; navUser.style.display = 'none'; refreshSaveButton(); return; }
+  const { status, data } = await api('/auth-me');
+  if (status === 200) {
+    navAuth.style.display = 'none'; navUser.style.display = '';
+    document.getElementById('nav-email').textContent = data.email;
+  } else {
+    setToken(null);
+    navAuth.style.display = ''; navUser.style.display = 'none';
+  }
+  refreshSaveButton();
+}
+async function logout() {
+  try { await api('/auth-logout', { method: 'POST' }); } catch (e) {}
+  setToken(null);
+  refreshNav();
+}
+function refreshSaveButton() {
+  const hasLink = document.getElementById('reviewlink').textContent.trim() !== '';
+  const logged = !!getToken();
+  const btn = document.getElementById('btn-save-qr');
+  const hint = document.getElementById('hint-login-save');
+  if (btn) btn.style.display = (hasLink && logged) ? '' : 'none';
+  if (hint) hint.style.display = (hasLink && !logged) ? '' : 'none';
+}
+async function saveCurrentQR() {
+  const link = document.getElementById('reviewlink').textContent.trim();
+  if (!link) return;
+  const name = prompt('Nom pour ce QR code (ex : Ma boulangerie) :', 'Mon commerce');
+  if (!name) return;
+  const m = link.match(/placeid=([^&]+)/i);
+  const placeId = m ? decodeURIComponent(m[1]) : '';
+  try {
+    const { status, data } = await api('/qr-save', {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        placeId,
+        colorDark: document.getElementById('qrcolor').value,
+        colorLight: document.getElementById('qrbg').value,
+        logo: (typeof premiumLogo !== 'undefined' ? premiumLogo : null),
+      }),
+    });
+    if (status === 201) {
+      alert('QR code sauvegardé ! Retrouvez-le dans votre tableau de bord.');
+    } else {
+      alert(data.error || 'Sauvegarde impossible.');
+    }
+  } catch (e) {
+    alert('Erreur réseau.');
+  }
+}
+refreshNav();
+</script>
+<!-- Modale auth -->
+<div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuth()">
+  <div class="modal">
+    <h2 id="auth-title">Créer un compte</h2>
+    <p class="hint" style="margin-top:0;">Gratuit — sauvegardez vos QR codes et retrouvez-les partout.</p>
+    <div class="tabs">
+      <button id="tab-signup" onclick="authTab('signup')">Inscription</button>
+      <button id="tab-login" class="inactive" onclick="authTab('login')">Connexion</button>
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+    <label for="auth-email">Email</label>
+    <input type="email" id="auth-email" placeholder="vous@commerce.fr" autocomplete="email">
+    <label for="auth-password">Mot de passe <span class="hint" style="display:inline;">(8 caractères min)</span></label>
+    <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+    <button id="auth-submit" onclick="submitAuth()">Créer mon compte</button>
+  </div>
+</div>
+</body>
+</html>

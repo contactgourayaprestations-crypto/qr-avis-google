@@ -1,0 +1,5 @@
+# Configuration Netlify — SaaS QR Avis Google v2
+# Functions monofichiers, zéro dépendance npm.
+
+[build]
+  functions = "netlify/functions"

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — QR Avis Google</title>
+<meta name="description" content="Gérez vos QR codes d'avis Google : créez, personnalisez, sauvegardez.">
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --accent:#22c55e; --text:#f1f5f9; --muted:#94a3b8; --danger:#ef4444; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .wrap { max-width:900px; margin:0 auto; padding:24px 16px 64px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; padding:12px 0 24px; }
+  .topbar .brand { font-weight:800; font-size:1.1rem; }
+  .topbar .user { color:var(--muted); font-size:.9rem; margin-right:12px; }
+  .btn { background:var(--accent); color:#052e16; border:none; border-radius:8px; padding:10px 18px; font-size:.95rem; font-weight:700; cursor:pointer; }
+  .btn:hover { filter:brightness(1.1); }
+  .btn.ghost { background:#334155; color:var(--text); }
+  .btn.danger { background:transparent; color:var(--danger); border:1px solid var(--danger); padding:8px 14px; font-size:.85rem; }
+  .btn.small { padding:8px 14px; font-size:.85rem; }
+  .card { background:var(--card); border-radius:14px; padding:24px; margin:20px 0; }
+  label { display:block; font-weight:600; margin-bottom:8px; font-size:.95rem; }
+  input[type=text], input[type=email] { width:100%; padding:12px; border-radius:8px; border:1px solid #334155; background:#0f172a; color:var(--text); font-size:1rem; margin-bottom:12px; }
+  h1 { font-size:1.5rem; margin-bottom:4px; }
+  .subtitle { color:var(--muted); margin-bottom:8px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; margin-top:16px; }
+  .qrcard { background:#0f172a; border:1px solid #334155; border-radius:12px; padding:16px; text-align:center; }
+  .qrcard h3 { font-size:1rem; margin-bottom:8px; word-break:break-word; }
+  .qrcard .qrbox { background:#fff; border-radius:8px; padding:10px; display:inline-block; position:relative; margin-bottom:10px; }
+  .qrcard .qrbox canvas, .qrcard .qrbox img.qr-main { display:block; }
+  .qrcard .meta { color:var(--muted); font-size:.8rem; margin-bottom:10px; word-break:break-all; }
+  .qrcard .actions { display:flex; gap:8px; justify-content:center; }
+  .empty { text-align:center; color:var(--muted); padding:40px 20px; }
+  .error { display:none; background:#450a0a; color:#fca5a5; border-radius:8px; padding:10px 12px; font-size:.9rem; margin-bottom:12px; }
+  .okmsg { display:none; background:#052e16; color:#86efac; border-radius:8px; padding:10px 12px; font-size:.9rem; margin-bottom:12px; }
+  .formrow { display:flex; gap:12px; }
+  .formrow > div { flex:1; }
+  a.back { color:var(--accent); text-decoration:none; font-size:.9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="brand">⭐ QR Avis Google</span>
+    <span><span class="user" id="user-email"></span><button class="btn ghost small" onclick="logout()">Déconnexion</button></span>
+  </div>
+
+  <a class="back" href="index.html">← Retour au générateur gratuit</a>
+  <h1 style="margin-top:12px;">Mon tableau de bord</h1>
+  <p class="subtitle">Vos QR codes sauvegardés, accessibles sur tous vos appareils.</p>
+
+  <div class="error" id="page-error"></div>
+  <div class="okmsg" id="page-ok"></div>
+
+  <div class="card">
+    <h2 style="font-size:1.15rem;margin-bottom:12px;">＋ Nouveau QR code</h2>
+    <label for="f-name">Nom (ex : Ma boulangerie — caisse)</label>
+    <input type="text" id="f-name" maxlength="60" placeholder="Ma boulangerie">
+    <label for="f-placeid">Place ID Google <em>ou</em> lien d'avis</label>
+    <input type="text" id="f-placeid" placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4">
+    <div class="formrow">
+      <div><label>Couleur du QR</label><input type="color" id="f-dark" value="#000000" style="width:100%;height:44px;"></div>
+      <div><label>Couleur du fond</label><input type="color" id="f-light" value="#ffffff" style="width:100%;height:44px;"></div>
+    </div>
+    <label for="f-logo">Logo au centre (optionnel, 200 Ko max)</label>
+    <input type="file" id="f-logo" accept="image/png,image/jpeg,image/webp" style="margin-bottom:16px;color:var(--muted);">
+    <button class="btn" id="btn-create" onclick="createQR()">💾 Sauvegarder ce QR code</button>
+  </div>
+
+  <h2 style="font-size:1.2rem;margin:8px 0 4px;">Mes QR codes <span id="qr-count" style="color:var(--muted);font-size:.9rem;"></span></h2>
+  <div id="qr-grid" class="grid"><div class="empty">Chargement…</div></div>
+</div>
+
+<script>
+var QR_SOURCES = [
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
+  'https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js'
+];
+var qrReady = false;
+(function loadQR(i) {
+  if (i >= QR_SOURCES.length) return;
+  var s = document.createElement('script');
+  s.src = QR_SOURCES[i];
+  s.onload = function () { if (typeof QRCode !== 'undefined') qrReady = true; else loadQR(i + 1); };
+  s.onerror = function () { loadQR(i + 1); };
+  document.head.appendChild(s);
+})(0);
+</script>
+<script>
+const API = '/.netlify/functions';
+const TOKEN_KEY = 'saasqr_token';
+const getToken = () => localStorage.getItem(TOKEN_KEY);
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  const tok = getToken();
+  if (tok) headers['Authorization'] = 'Bearer ' + tok;
+  const res = await fetch(API + path, { ...opts, headers });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  return { status: res.status, data };
+}
+function showError(msg) { const el = document.getElementById('page-error'); el.textContent = msg; el.style.display = 'block'; }
+function showOk(msg) { const el = document.getElementById('page-ok'); el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 4000); }
+function hideMsgs() { document.getElementById('page-error').style.display = 'none'; }
+
+async function guard() {
+  const tok = getToken();
+  if (!tok) { window.location.href = 'index.html'; return false; }
+  const { status, data } = await api('/auth-me');
+  if (status !== 200) { localStorage.removeItem(TOKEN_KEY); window.location.href = 'index.html'; return false; }
+  document.getElementById('user-email').textContent = data.email;
+  return true;
+}
+async function logout() {
+  try { await api('/auth-logout', { method: 'POST' }); } catch (e) {}
+  localStorage.removeItem(TOKEN_KEY);
+  window.location.href = 'index.html';
+}
+
+function renderQRInto(box, qr) {
+  box.innerHTML = '';
+  if (!qrReady || typeof QRCode === 'undefined') {
+    box.innerHTML = '<span style="color:#94a3b8;font-size:.85rem;">QR indisponible</span>';
+    return;
+  }
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:relative;width:160px;height:160px;';
+  box.appendChild(holder);
+  new QRCode(holder, { text: qr.link, width: 160, height: 160, colorDark: qr.colorDark || '#000000', colorLight: qr.colorLight || '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+  if (qr.logo) {
+    const img = document.createElement('img');
+    img.src = qr.logo;
+    img.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;';
+    holder.appendChild(img);
+  }
+}
+
+async function loadList() {
+  const grid = document.getElementById('qr-grid');
+  const { status, data } = await api('/qr-list');
+  if (status !== 200) { grid.innerHTML = '<div class="empty">Impossible de charger vos QR codes.</div>'; return; }
+  const list = data.qrcodes || [];
+  document.getElementById('qr-count').textContent = list.length ? `(${list.length})` : '';
+  if (!list.length) { grid.innerHTML = '<div class="empty">Aucun QR code sauvegardé pour l\'instant.<br>Créez-en un ci-dessus !</div>'; return; }
+  grid.innerHTML = '';
+  list.forEach((qr) => {
+    const card = document.createElement('div');
+    card.className = 'qrcard';
+    card.innerHTML = `<h3></h3><div class="qrbox"></div><div class="meta"></div>
+      <div class="actions">
+        <button class="btn small ghost" data-act="dl">⬇️ PNG</button>
+        <button class="btn small ghost" data-act="copy">📋 Lien</button>
+        <button class="btn danger" data-act="del">Supprimer</button>
+      </div>`;
+    card.querySelector('h3').textContent = qr.name;
+    card.querySelector('.meta').textContent = new Date(qr.createdAt).toLocaleDateString('fr-FR');
+    renderQRInto(card.querySelector('.qrbox'), qr);
+    card.querySelector('[data-act="dl"]').onclick = () => downloadQR(card, qr.name);
+    card.querySelector('[data-act="copy"]').onclick = () => {
+      navigator.clipboard.writeText(qr.link).then(() => showOk('Lien copié !'));
+    };
+    card.querySelector('[data-act="del"]').onclick = () => deleteQR(qr.id, qr.name);
+    grid.appendChild(card);
+  });
+}
+
+function downloadQR(card, name) {
+  const img = card.querySelector('.qrbox img') || card.querySelector('.qrbox canvas');
+  if (!img) return;
+  // Pour un PNG fidèle (avec logo), on compose via canvas
+  const srcCanvas = card.querySelector('.qrbox canvas');
+  const logoImg = card.querySelector('.qrbox img:not(.qr-main)');
+  const out = document.createElement('canvas');
+  out.width = 600; out.height = 600;
+  const ctx = out.getContext('2d');
+  const drawLogo = () => {
+    const li = card.querySelector('.qrbox img[src^="data:"]');
+    if (li && li.complete) {
+      const s = 120, x = (600 - s) / 2;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.roundRect(x - 8, x - 8, s + 16, s + 16, 12); ctx.fill();
+      ctx.drawImage(li, x, x, s, s);
+    }
+    const a = document.createElement('a');
+    a.download = 'qr-' + name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
+    a.href = out.toDataURL('image/png');
+    a.click();
+  };
+  if (srcCanvas) { ctx.drawImage(srcCanvas, 0, 0, 600, 600); drawLogo(); }
+  else if (img.src) {
+    const tmp = new Image();
+    tmp.onload = () => { ctx.drawImage(tmp, 0, 0, 600, 600); drawLogo(); };
+    tmp.src = img.src;
+  }
+}
+
+async function deleteQR(id, name) {
+  if (!confirm(`Supprimer « ${name} » ?`)) return;
+  hideMsgs();
+  const { status, data } = await api('/qr-delete?id=' + encodeURIComponent(id), { method: 'DELETE' });
+  if (status === 200) { showOk('QR code supprimé.'); loadList(); }
+  else showError(data.error || 'Suppression impossible.');
+}
+
+function readLogoAsDataURL() {
+  return new Promise((resolve) => {
+    const f = document.getElementById('f-logo').files[0];
+    if (!f) return resolve(null);
+    if (f.size > 200 * 1024) return resolve({ error: 'Logo trop lourd (200 Ko max).' });
+    const r = new FileReader();
+    r.onload = (e) => resolve(e.target.result);
+    r.onerror = () => resolve({ error: 'Lecture du logo impossible.' });
+    r.readAsDataURL(f);
+  });
+}
+
+async function createQR() {
+  hideMsgs();
+  const name = document.getElementById('f-name').value.trim();
+  const placeId = document.getElementById('f-placeid').value.trim();
+  if (!name) return showError('Donnez un nom à votre QR code.');
+  if (!placeId) return showError('Place ID ou lien d\'avis requis.');
+  const logoRes = await readLogoAsDataURL();
+  if (logoRes && logoRes.error) return showError(logoRes.error);
+  const btn = document.getElementById('btn-create');
+  btn.disabled = true; btn.textContent = 'Sauvegarde…';
+  try {
+    const { status, data } = await api('/qr-save', {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        placeId,
+        colorDark: document.getElementById('f-dark').value,
+        colorLight: document.getElementById('f-light').value,
+        logo: logoRes || null,
+      }),
+    });
+    if (status === 201) {
+      showOk('QR code sauvegardé !');
+      document.getElementById('f-name').value = '';
+      document.getElementById('f-placeid').value = '';
+      document.getElementById('f-logo').value = '';
+      loadList();
+    } else {
+      showError(data.error || 'Sauvegarde impossible.');
+    }
+  } catch (e) {
+    showError('Erreur réseau.');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Sauvegarder ce QR code';
+  }
+}
+
+(async function init() {
+  if (await guard()) {
+    // Attend que la lib QR soit prête avant d'afficher la liste
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      if (qrReady || tries > 20) { clearInterval(t); loadList(); }
+    }, 250);
+  }
+})();
+</script>
+</body>
+</html>
